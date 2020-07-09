@@ -1,31 +1,48 @@
 import React, {Component} from 'react';
 import logo from './logo.svg';
 import './App.css';
-import Product from '../product/product';
 
+//Components
+import Product from '../product/product';
+import WishList from '../wishList/wishlist';
+
+//Services
 import HttpService from '../services/http-service';
 
 const http = new HttpService();
-  
-//function App() {
 
 class App extends Component {
   constructor(props) {
     super(props);
+
+    //ini array empty, don't want null to ini first
+    this.state = {products:[]}; 
+
     // Bind functions
     this.loadData = this.loadData.bind(this);
-  
+    this.productList = this.productList.bind(this); // need to bind all functions
     this.loadData();
   }
 
   loadData = () => {
-        http.getProducts().then(products => {
-          console.log(products);
+        var self = this;
+        http.getProducts().then(data => {
+          self.setState({products: data}) // everytime setState reloads component render()
         }, err => {
           // "You Stink!" if error
         });
   }
   
+  productList = () => {
+      const list = this.state.products.map((product) => 
+        <div className="col-sm-4" key={product._id}> {/*key outer level */}
+          <Product title={product.title} price={product.price} imgUrl={product.imgUrl} />
+        </div>
+      
+    );
+    return (list);
+  }
+
     
   render() {
   return (
@@ -45,12 +62,17 @@ class App extends Component {
         </a>
 
       </header>
-      <div className="container App-main">
-        <div className="row">
-            <Product className="col-sm-4" price="4.23" title="Cool Toy Gun" imgUrl="https://images-na.ssl-images-amazon.com/images/I/71UUbn1lwGL._AC_SX425_.jpg"/>
-            <Product className="col-sm-4" price="4.23" title="Cool Toy Gun" imgUrl="https://images-na.ssl-images-amazon.com/images/I/71UUbn1lwGL._AC_SX425_.jpg"/>
-            <Product className="col-sm-4" price="4.23" title="Cool Toy Gun" imgUrl="https://images-na.ssl-images-amazon.com/images/I/71UUbn1lwGL._AC_SX425_.jpg"/>
-          </div>
+        <div className="container-fluid App-main">
+          <div className="row">
+              <div className="col-sm-8">
+                <div className="row">
+                  {this.productList()}
+                </div>
+              </div>
+              <div className="col-sm-4">
+                <WishList />
+              </div>  
+            </div>
         </div>
       </div>
   )
